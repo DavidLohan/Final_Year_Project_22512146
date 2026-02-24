@@ -19,6 +19,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.scene.image.WritableImage;
 
 public class DrawingApp {
 
@@ -96,7 +97,15 @@ public class DrawingApp {
                 return;
             }
 
-            feedbackLabel.setText("Submitted!"); //Will replace with actual submission when backend is ready.
+            WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
+            canvas.snapshot(null, snapshot);
+
+            // Save to in-memory store (Communication Board)
+            DrawingItem saved = DrawingStore.getInstance().addDrawing(snapshot);
+
+            // Go to feedback screen
+            String message = "Saved to your Communication Board as: " + saved.getTitle();
+            stage.setScene(new FeedbackScreen().createScene(stage, snapshot, message));
         });
 
         // Drawing events
