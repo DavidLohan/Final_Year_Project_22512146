@@ -1,0 +1,6 @@
+apple
+dog
+bus
+cat
+bird
+mug
