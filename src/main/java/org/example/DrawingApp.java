@@ -99,12 +99,15 @@ public class DrawingApp {
             WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
             canvas.snapshot(null, snapshot);
 
-            // Save to in-memory store (Communication Board)
+            // Save to in-memory store (Communication Board)s
             DrawingItem saved = DrawingStore.getInstance().addDrawing(snapshot);
 
-            // Go to feedback screen
-            String message = "Saved to your Communication Board as: " + saved.getTitle();
-            stage.setScene(new FeedbackScreen().createScene(stage, snapshot, message));
+            try {
+                PredictionResult result = PredictionClient.predict(snapshot);
+                stage.setScene(new FeedbackScreen().createScene(stage, snapshot, saved, result));
+            } catch (Exception ex) {
+                feedbackLabel.setText("Prediction failed: " + ex.getMessage());
+            }
         });
 
         // Drawing events
@@ -125,7 +128,7 @@ public class DrawingApp {
     }
 
     /**
-     * Returns true if the canvas is effectively blank (all pixels white).
+     * Returns true if the canvas is blank (all pixels white).
      * */
     private boolean isCanvasBlank(Canvas canvas) {
         int w = (int) canvas.getWidth();

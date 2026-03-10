@@ -17,6 +17,8 @@ public class DrawingItem {
     }
 
     public String getTitle() { return title.get(); }
+    public void setTitle(String title) { this.title.set(title); }
+
     public Image getImage() { return image.get(); }
     public LocalDateTime getCreatedAt() { return createdAt.get(); }
 
