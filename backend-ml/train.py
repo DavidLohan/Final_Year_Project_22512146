@@ -15,7 +15,7 @@ CLASSES = [
     "mug"
 ]
 
-SAMPLES_PER_CLASS = 5000
+SAMPLES_PER_CLASS = 10000
 
 def load_data():
     X_list = []
@@ -77,7 +77,7 @@ print("Training model...")
 model.fit(
     X_train,
     y_train,
-    epochs=5,
+    epochs=10,
     batch_size=128,
     validation_data=(X_test, y_test)
 )
