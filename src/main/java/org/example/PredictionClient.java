@@ -36,10 +36,7 @@ public class PredictionClient {
             throw new IOException("Backend returned status " + response.statusCode() + ": " + response.body());
         }
 
-        String json = response.body();
-        System.out.println("Backend response: " + json);
-        return parsePrediction(json);
-        //return parsePrediction(response.body());
+        return parsePrediction(response.body());
     }
     private static byte[] toPngBytes(WritableImage image) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
