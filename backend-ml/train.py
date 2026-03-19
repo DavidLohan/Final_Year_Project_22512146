@@ -9,11 +9,19 @@ MODEL_DIR = "model"
 
 CLASSES = [
     "apple",
-    "dog",
-    "bus",
-    "cat",
+    "banana",
+    "bed",
     "bird",
-    "mug"
+    "book",
+    "bus",
+    "car",
+    "cat",
+    "chair",
+    "dog",
+    "flower",
+    "key",
+    "mug",
+    "umbrella"
 ]
 
 SAMPLES_PER_CLASS = 15000
