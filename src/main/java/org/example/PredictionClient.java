@@ -3,6 +3,9 @@ package org.example;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.WritableImage;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,6 +15,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.example.SessionManager;
 
 public class PredictionClient {
 
@@ -47,27 +51,43 @@ public class PredictionClient {
     private static byte[] buildMultipartBody(byte[] imageBytes, String boundary) throws IOException {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-        String start = "--" + boundary + "\r\n"
+        String sessionPart = "--" + boundary + "\r\n"
+                + "Content-Disposition: form-data; name=\"session_id\"\r\n\r\n"
+                + SessionManager.getSessionId() + "\r\n";
+
+        output.write(sessionPart.getBytes());
+
+        String filePartHeader = "--" + boundary + "\r\n"
                 + "Content-Disposition: form-data; name=\"file\"; filename=\"drawing.png\"\r\n"
                 + "Content-Type: image/png\r\n\r\n";
 
-        String end = "\r\n--" + boundary + "--\r\n";
-
-        output.write(start.getBytes());
+        output.write(filePartHeader.getBytes());
         output.write(imageBytes);
-        output.write(end.getBytes());
+        output.write("\r\n".getBytes());
+
+        String endMarker = "--" + boundary + "--\r\n";
+        output.write(endMarker.getBytes());
 
         return output.toByteArray();
     }
 
     private static PredictionResult parsePrediction(String json) {
-        String label = extractString(json, "\"label\"\\s*:\\s*\"([^\"]+)\"");
-        double confidence = extractDouble(json, "\"confidence\"\\s*:\\s*([0-9.Ee+-]+)");
-
-        String firstAlt = extractNthLabel(json, 2);
-        String secondAlt = extractNthLabel(json, 3);
-
-        return new PredictionResult(label, confidence, firstAlt, secondAlt, json);
+        JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+        int id = obj.get("id").getAsInt();
+        String label = obj.get("label").getAsString();
+        double confidence = obj.get("confidence").getAsDouble();
+        String second = "";
+        String third = "";
+        if (obj.has("top3")) {
+            JsonArray top3 = obj.getAsJsonArray("top3");
+            if (top3.size() > 1) {
+                second = top3.get(1).getAsJsonObject().get("label").getAsString();
+            }
+            if (top3.size() > 2) {
+                third = top3.get(2).getAsJsonObject().get("label").getAsString();
+            }
+        }
+        return new PredictionResult(id, label, confidence, second, third, json);
     }
 
     private static String extractString(String text, String regex) {
