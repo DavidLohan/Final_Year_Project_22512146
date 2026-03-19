@@ -1,12 +1,32 @@
+# README
+
 This is my README file
 
-As of rn to run the canvas run "mvn clean javafx:run"
+---
 
-In the ML folder terminal may not be in the right path so gotta 
+## Running the Canvas
+
+As of rn to run the canvas run:
+
+```
+mvn clean javafx:run
+```
+
+---
+
+## Running the Machine Learning API
+
+In the ML folder terminal may not be in the right path so gotta
 cd into the ML folder.
 
-For running api first run:
-.\.venv\Scripts\Activate.ps1
+### Step 1: Activate Virtual Environment
 
-Then run:
+```
+.\.venv\Scripts\Activate.ps1
+```
+
+### Step 2: Run the API
+
+```
 uvicorn api:app --reload --port 8000
+```
