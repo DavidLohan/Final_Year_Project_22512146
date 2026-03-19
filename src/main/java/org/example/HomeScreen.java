@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 public class HomeScreen {
@@ -14,12 +13,10 @@ public class HomeScreen {
     private final Scene scene;
 
     public HomeScreen(Stage stage) {
-
         Label title = new Label("Drawing Communication App");
-        title.setFont(new Font(40));
-
+        title.getStyleClass().add("title-label");
         Label subtitle = new Label("Draw to communicate visually.");
-        subtitle.setFont(new Font(18));
+        subtitle.getStyleClass().add("subtitle-label");
 
         Button startBtn = new Button("Start Drawing");
         Button viewSavedBtn = new Button("View Saved Drawings");
@@ -28,6 +25,10 @@ public class HomeScreen {
         startBtn.setMinWidth(220);
         viewSavedBtn.setMinWidth(220);
         exitBtn.setMinWidth(220);
+
+        startBtn.getStyleClass().add("primary-button");
+        viewSavedBtn.getStyleClass().add("secondary-button");
+        exitBtn.getStyleClass().add("secondary-button");
 
         startBtn.setOnAction(e -> stage.setScene(new DrawingApp(stage).getScene()));
 
@@ -40,6 +41,10 @@ public class HomeScreen {
         root.setPadding(new Insets(30));
 
         scene = new Scene(root, 1000, 700);
+
+        scene.getStylesheets().add(
+                getClass().getResource("/design/style.css").toExternalForm()
+        );
     }
 
     public Scene getScene() {

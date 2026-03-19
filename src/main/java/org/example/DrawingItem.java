@@ -9,13 +9,16 @@ public class DrawingItem {
     private final StringProperty title = new SimpleStringProperty();
     private final ObjectProperty<Image> image = new SimpleObjectProperty<>();
     private final ObjectProperty<LocalDateTime> createdAt = new SimpleObjectProperty<>();
+    private final int id;
 
-    public DrawingItem(String title, Image image, LocalDateTime createdAt) {
+    public DrawingItem(int id, String title, Image image, LocalDateTime createdAt) {
+        this.id = id;
         this.title.set(title);
         this.image.set(image);
         this.createdAt.set(createdAt);
     }
 
+    public int getId() { return id; }
     public String getTitle() { return title.get(); }
     public void setTitle(String title) { this.title.set(title); }
 

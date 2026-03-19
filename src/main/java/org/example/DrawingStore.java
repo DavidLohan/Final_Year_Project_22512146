@@ -25,7 +25,7 @@ public class DrawingStore {
 
     public DrawingItem addDrawing(Image image) {
         String title = "Drawing " + counter.getAndIncrement();
-        DrawingItem item = new DrawingItem(title, image, LocalDateTime.now());
+        DrawingItem item = new DrawingItem(-1,title, image, LocalDateTime.now());
         drawings.add(item);
         return item;
     }

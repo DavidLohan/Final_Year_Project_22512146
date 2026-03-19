@@ -17,6 +17,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -31,16 +32,17 @@ public class DrawingApp {
     public DrawingApp(Stage stage) {
 
         BorderPane root = new BorderPane();
+        root.setPadding(new Insets(20));
 
-        // Canvas
+        Label title = new Label("Drawing Canvas");
+        title.getStyleClass().add("title-label");
+
         Canvas canvas = new Canvas(900, 560);
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        // White background
         clearCanvas(gc, canvas);
 
-        // Controls
-        Button backBtn = new Button("← Back");
+        Button backBtn = new Button("Back");
         ToggleButton eraserBtn = new ToggleButton("Eraser");
         Button clearBtn = new Button("Clear");
         Button submitBtn = new Button("Submit");
@@ -53,34 +55,53 @@ public class DrawingApp {
         sizeSlider.setPrefWidth(180);
 
         Label feedbackLabel = new Label("Draw something, then press Submit.");
-        feedbackLabel.setPadding(new Insets(10));
+        feedbackLabel.getStyleClass().add("info-label");
+        feedbackLabel.setWrapText(true);
+
+        backBtn.getStyleClass().add("secondary-button");
+        eraserBtn.getStyleClass().add("secondary-button");
+        clearBtn.getStyleClass().add("secondary-button");
+        submitBtn.getStyleClass().add("primary-button");
 
         HBox controls = new HBox(
                 12,
                 backBtn,
                 new Separator(),
-                new Label("Color:"), colorPicker,
-                new Label("Brush:"), sizeSlider,
-                eraserBtn, clearBtn, submitBtn
+                new Label("Color:"),
+                colorPicker,
+                new Label("Brush:"),
+                sizeSlider,
+                eraserBtn,
+                clearBtn,
+                submitBtn
         );
         controls.setAlignment(Pos.CENTER_LEFT);
-        controls.setPadding(new Insets(10));
-        controls.setStyle("-fx-background-color: #ffffff; -fx-border-color: #e5e5e5;");
+
+        VBox toolbarBox = new VBox(12, title, controls);
+        toolbarBox.getStyleClass().add("card");
 
         StackPane canvasHolder = new StackPane(canvas);
-        canvasHolder.setPadding(new Insets(15));
-        canvasHolder.setStyle("-fx-background-color: #f5f6fa;");
+        canvasHolder.setAlignment(Pos.CENTER);
+        canvasHolder.getStyleClass().add("canvas-box");
 
-        root.setTop(controls);
+        VBox bottomBox = new VBox(feedbackLabel);
+        bottomBox.setAlignment(Pos.CENTER_LEFT);
+        bottomBox.getStyleClass().add("card");
+
+        root.setTop(toolbarBox);
         root.setCenter(canvasHolder);
-        root.setBottom(feedbackLabel);
+        root.setBottom(bottomBox);
+
+        BorderPane.setMargin(toolbarBox, new Insets(0, 0, 20, 0));
+        BorderPane.setMargin(canvasHolder, new Insets(0, 0, 20, 0));
 
         scene = new Scene(root, 1000, 700);
+        scene.getStylesheets().add(
+                getClass().getResource("/design/style.css").toExternalForm()
+        );
 
-        // Navigation
         backBtn.setOnAction(e -> stage.setScene(new HomeScreen(stage).getScene()));
 
-        // Control actions
         colorPicker.setOnAction(e -> brushColor = colorPicker.getValue());
         sizeSlider.valueProperty().addListener((obs, oldV, newV) -> brushSize = newV.doubleValue());
         eraserBtn.setOnAction(e -> eraserOn = eraserBtn.isSelected());
@@ -99,18 +120,14 @@ public class DrawingApp {
             WritableImage snapshot = new WritableImage((int) canvas.getWidth(), (int) canvas.getHeight());
             canvas.snapshot(null, snapshot);
 
-            // Save to in-memory store (Communication Board)s
-            DrawingItem saved = DrawingStore.getInstance().addDrawing(snapshot);
-
             try {
                 PredictionResult result = PredictionClient.predict(snapshot);
-                stage.setScene(new FeedbackScreen().createScene(stage, snapshot, saved, result));
+                stage.setScene(new FeedbackScreen().createScene(stage, snapshot, result));
             } catch (Exception ex) {
                 feedbackLabel.setText("Prediction failed: " + ex.getMessage());
             }
         });
 
-        // Drawing events
         canvas.addEventHandler(MouseEvent.MOUSE_PRESSED, e -> drawDot(gc, e));
         canvas.addEventHandler(MouseEvent.MOUSE_DRAGGED, e -> drawDot(gc, e));
     }
@@ -127,9 +144,6 @@ public class DrawingApp {
         gc.fillOval(x, y, brushSize, brushSize);
     }
 
-    /**
-     * Returns true if the canvas is blank (all pixels white).
-     * */
     private boolean isCanvasBlank(Canvas canvas) {
         int w = (int) canvas.getWidth();
         int h = (int) canvas.getHeight();
@@ -140,15 +154,13 @@ public class DrawingApp {
         PixelReader pr = snapshot.getPixelReader();
         if (pr == null) return true;
 
-        // Tolerance: allow near-white pixels to count as "blank"
-        final double tol = 0.03; // 3% tolerance
-        final int step = 2;      // sample every 2 pixels for speed
+        final double tol = 0.03;
+        final int step = 2;
 
         for (int y = 0; y < h; y += step) {
             for (int x = 0; x < w; x += step) {
                 Color c = pr.getColor(x, y);
 
-                // If any pixel is not near-white and visible canvas isn't blank
                 if (c.getOpacity() > 0.01 &&
                         (c.getRed() < 1.0 - tol || c.getGreen() < 1.0 - tol || c.getBlue() < 1.0 - tol)) {
                     return false;
