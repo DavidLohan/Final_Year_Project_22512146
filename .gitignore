@@ -46,3 +46,6 @@ build/
 backend-ml/.venv/
 backend-ml/__pycache__/
 backend-ml/data/
+backend-ml/.env
+backend-ml/saved_images/
+session.txt

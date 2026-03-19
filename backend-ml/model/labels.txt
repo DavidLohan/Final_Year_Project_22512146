@@ -1,6 +1,14 @@
 apple
-dog
-bus
-cat
+banana
+bed
 bird
+book
+bus
+car
+cat
+chair
+dog
+flower
+key
 mug
+umbrella
