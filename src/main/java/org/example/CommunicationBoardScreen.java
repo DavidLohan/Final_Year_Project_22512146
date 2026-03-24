@@ -95,11 +95,15 @@ public class CommunicationBoardScreen {
         Label previewLabel = new Label("Select a drawing to preview");
         previewLabel.getStyleClass().add("info-label");
 
+        Button speakSelected = new Button("Speak Selected");
+        speakSelected.getStyleClass().add("primary-button");
+        speakSelected.setDisable(true);
+
         VBox previewImageBox = new VBox(preview);
         previewImageBox.setAlignment(Pos.CENTER);
         previewImageBox.getStyleClass().add("canvas-box");
 
-        VBox previewBox = new VBox(12, previewLabel, previewImageBox);
+        VBox previewBox = new VBox(12, previewLabel, previewImageBox, speakSelected);
         previewBox.setAlignment(Pos.TOP_CENTER);
         previewBox.getStyleClass().add("card");
         previewBox.setPrefWidth(460);
@@ -108,9 +112,18 @@ public class CommunicationBoardScreen {
             if (selected == null) {
                 preview.setImage(null);
                 previewLabel.setText("Select a drawing to preview");
+                speakSelected.setDisable(true);
             } else {
                 preview.setImage(selected.getImage());
                 previewLabel.setText(selected.getTitle());
+                speakSelected.setDisable(false);
+            }
+        });
+
+        speakSelected.setOnAction(e -> {
+            DrawingItem selected = listView.getSelectionModel().getSelectedItem();
+            if (selected != null && selected.getTitle() != null && !selected.getTitle().isBlank()) {
+                TextToSpeechUtil.speak(selected.getTitle());
             }
         });
 
@@ -146,6 +159,7 @@ public class CommunicationBoardScreen {
                         drawings.remove(selected);
                         preview.setImage(null);
                         previewLabel.setText("Select a drawing to preview");
+                        speakSelected.setDisable(true);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         new Alert(
@@ -172,6 +186,7 @@ public class CommunicationBoardScreen {
                         drawings.clear();
                         preview.setImage(null);
                         previewLabel.setText("Select a drawing to preview");
+                        speakSelected.setDisable(true);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                         new Alert(
