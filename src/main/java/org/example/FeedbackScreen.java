@@ -44,20 +44,31 @@ public class FeedbackScreen {
 
         refreshText.run();
 
+        Button speakBtn = new Button("Speak Word");
         Button correctBtn = new Button("Correct");
         Button notCorrectBtn = new Button("Not Correct");
         Button goToBoard = new Button("Go to Communication Board");
         Button backHome = new Button("Back to Home");
 
+        speakBtn.getStyleClass().add("primary-button");
         correctBtn.getStyleClass().add("primary-button");
         notCorrectBtn.getStyleClass().add("secondary-button");
         goToBoard.getStyleClass().add("secondary-button");
         backHome.getStyleClass().add("secondary-button");
 
+        speakBtn.setMinWidth(220);
         correctBtn.setMinWidth(220);
         notCorrectBtn.setMinWidth(220);
         goToBoard.setMinWidth(220);
         backHome.setMinWidth(220);
+
+        speakBtn.setOnAction(e -> {
+            try {
+                TextToSpeechUtil.speak(result.getCurrentGuess());
+            } catch (Exception ex) {
+                infoLabel.setText("Could not speak the word.\nError: " + ex.getMessage());
+            }
+        });
 
         correctBtn.setOnAction(e -> {
             try {
@@ -83,6 +94,7 @@ public class FeedbackScreen {
                                 + "\nYou can go back and try drawing it more clearly."
                 );
                 notCorrectBtn.setDisable(true);
+                speakBtn.setDisable(true);
             }
         });
 
@@ -90,7 +102,7 @@ public class FeedbackScreen {
         backHome.setOnAction(e -> stage.setScene(new HomeScreen(stage).getScene()));
 
         VBox card = new VBox(15, imageBox, guessLabel, infoLabel,
-                correctBtn, notCorrectBtn, goToBoard, backHome);
+                speakBtn, correctBtn, notCorrectBtn, goToBoard, backHome);
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(500);
         card.getStyleClass().add("card");
