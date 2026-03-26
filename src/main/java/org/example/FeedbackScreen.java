@@ -29,7 +29,6 @@ public class FeedbackScreen {
         Label guessLabel = new Label();
         guessLabel.setWrapText(true);
         guessLabel.getStyleClass().add("section-label");
-        guessLabel.setId("guessLabel"); //here
 
         Label infoLabel = new Label();
         infoLabel.setWrapText(true);

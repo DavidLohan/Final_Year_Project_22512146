@@ -36,7 +36,6 @@ public class CommunicationBoardScreen {
             e.printStackTrace();
         }
 
-
         ListView<DrawingItem> listView = new ListView<>(drawings);
 
         listView.setCellFactory(lv -> new ListCell<>() {
