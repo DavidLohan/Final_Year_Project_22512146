@@ -22,7 +22,7 @@ cd into the ML folder.
 ### Step 1: Activate Virtual Environment
 
 ```
-.\.venv\Scripts\Activate.ps1
+.\.venv312\Scripts\Activate.ps1
 ```
 
 ### Step 2: Run the API
