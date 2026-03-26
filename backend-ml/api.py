@@ -5,6 +5,7 @@ import uuid
 import numpy as np
 from fastapi import FastAPI, File, UploadFile, Form, Depends, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps
 from scipy import ndimage
 from sqlalchemy.orm import Session
@@ -12,11 +13,12 @@ from tensorflow import keras
 
 from database import engine, Base, get_db
 from models import PredictionRecord
-from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
-app.mount("/saved_images", StaticFiles(directory="saved_images"), name="saved_images")
+IMAGE_FOLDER = "saved_images"
+os.makedirs(IMAGE_FOLDER, exist_ok=True)
+app.mount("/saved_images", StaticFiles(directory=IMAGE_FOLDER), name="saved_images")
 
 app.add_middleware(
     CORSMiddleware,
@@ -28,13 +30,26 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
-IMAGE_FOLDER = "saved_images"
-os.makedirs(IMAGE_FOLDER, exist_ok=True)
+MODEL_PATH = os.path.join("model", "quickdraw_model.keras")
+LABELS_PATH = os.path.join("model", "labels.txt")
+IMG_SIZE = 28
 
-model = keras.models.load_model("model/quickdraw_model.h5")
+if not os.path.exists(MODEL_PATH):
+    raise FileNotFoundError(f"Model file not found: {MODEL_PATH}")
 
-with open("model/labels.txt", "r") as f:
-    labels = [line.strip() for line in f.readlines()]
+if not os.path.exists(LABELS_PATH):
+    raise FileNotFoundError(f"Labels file not found: {LABELS_PATH}")
+
+model = keras.models.load_model(MODEL_PATH)
+
+with open(LABELS_PATH, "r", encoding="utf-8") as f:
+    labels = [line.strip() for line in f.readlines() if line.strip()]
+
+model_output_size = model.output_shape[-1]
+if len(labels) != model_output_size:
+    raise ValueError(
+        f"Label count ({len(labels)}) does not match model output size ({model_output_size})."
+    )
 
 
 def preprocess_image(image_bytes):
@@ -86,19 +101,29 @@ def preprocess_image(image_bytes):
     square[y_offset:y_offset + h, x_offset:x_offset + w] = arr
 
     pad = 12
-    square = np.pad(square, ((pad, pad), (pad, pad)), mode="constant", constant_values=0)
+    square = np.pad(
+        square,
+        ((pad, pad), (pad, pad)),
+        mode="constant",
+        constant_values=0
+    )
 
     img = Image.fromarray(square)
-    img = img.resize((28, 28))
+    img = img.resize((IMG_SIZE, IMG_SIZE))
 
     arr = np.array(img).astype("float32") / 255.0
-    arr = arr.reshape(1, 28, 28, 1)
+    arr = arr.reshape(1, IMG_SIZE, IMG_SIZE, 1)
 
     return arr
 
+
 @app.get("/")
 def root():
-    return {"message": "QuickDraw backend is running"}
+    return {
+        "message": "QuickDraw backend is running",
+        "num_classes": len(labels),
+        "classes": labels
+    }
 
 
 @app.post("/predict")
@@ -109,8 +134,12 @@ async def predict(
 ):
     image_bytes = await file.read()
 
+    if not image_bytes:
+        raise HTTPException(status_code=400, detail="Empty file uploaded")
+
     filename = f"{uuid.uuid4()}.png"
     filepath = os.path.join(IMAGE_FOLDER, filename)
+
     with open(filepath, "wb") as f:
         f.write(image_bytes)
 
@@ -119,7 +148,10 @@ async def predict(
     if processed is None:
         if os.path.exists(filepath):
             os.remove(filepath)
-        raise HTTPException(status_code=400, detail="Drawing too small or unclear. Please draw more clearly.")
+        raise HTTPException(
+            status_code=400,
+            detail="Drawing too small or unclear. Please draw more clearly."
+        )
 
     predictions = model.predict(processed, verbose=0)[0]
     predicted_index = int(np.argmax(predictions))
@@ -177,6 +209,8 @@ def get_predictions(session_id: str, db: Session = Depends(get_db)):
         }
         for item in results
     ]
+
+
 @app.put("/predictions/{prediction_id}/label")
 def update_prediction_label(
     prediction_id: int,
@@ -201,6 +235,7 @@ def update_prediction_label(
         "label": record.predicted_label
     }
 
+
 @app.delete("/predictions/{prediction_id}")
 def delete_prediction(prediction_id: int, db: Session = Depends(get_db)):
     record = (
@@ -219,6 +254,7 @@ def delete_prediction(prediction_id: int, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Prediction deleted successfully"}
+
 
 @app.delete("/predictions/session/{session_id}")
 def delete_all_predictions_for_session(session_id: str, db: Session = Depends(get_db)):
