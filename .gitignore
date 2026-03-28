@@ -49,4 +49,5 @@ backend-ml/__pycache__/
 backend-ml/data/
 backend-ml/.env
 backend-ml/saved_images/
+backend-ml/app/__pycache__/
 session.txt

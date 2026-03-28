@@ -6,20 +6,29 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import javafx.scene.image.Image;
 
-import java.time.OffsetDateTime;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BackendService {
 
-    private static final String BASE_URL = "http://127.0.0.1:8000";
+    private static final String DEFAULT_BASE_URL = "http://127.0.0.1:8000";
+
+    private static final String BASE_URL =
+            System.getProperty("backend.url",
+                    System.getenv().getOrDefault("BACKEND_URL", DEFAULT_BASE_URL));
+
     private static final HttpClient client = HttpClient.newHttpClient();
+
+    public static String getBaseUrl() {
+        return BASE_URL;
+    }
 
     public static List<DrawingItem> fetchDrawings() throws IOException, InterruptedException {
         String sessionId = SessionManager.getSessionId();
@@ -62,7 +71,8 @@ public class BackendService {
     }
 
     public static void updateDrawingLabel(int id, String newLabel) throws IOException, InterruptedException {
-        String json = "{\"new_label\":\"" + newLabel + "\"}";
+        String escapedLabel = newLabel.replace("\"", "\\\"");
+        String json = "{\"new_label\":\"" + escapedLabel + "\"}";
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(BASE_URL + "/predictions/" + id + "/label"))
@@ -103,6 +113,20 @@ public class BackendService {
         if (response.statusCode() != 200) {
             throw new IOException("Failed to clear drawings. Status: " + response.statusCode()
                     + ", Body: " + response.body());
+        }
+    }
+
+    public static boolean healthCheck() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/health"))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            return response.statusCode() == 200;
+        } catch (Exception e) {
+            return false;
         }
     }
 }
