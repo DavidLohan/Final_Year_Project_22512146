@@ -96,9 +96,10 @@ public class DrawingApp {
         BorderPane.setMargin(canvasHolder, new Insets(0, 0, 20, 0));
 
         scene = new Scene(root, 1000, 700);
-        scene.getStylesheets().add(
-                getClass().getResource("/design/style.css").toExternalForm()
-        );
+        var stylesheet = getClass().getResource("/design/style.css");
+        if (stylesheet != null) {
+            scene.getStylesheets().add(stylesheet.toExternalForm());
+        }
 
         backBtn.setOnAction(e -> stage.setScene(new HomeScreen(stage).getScene()));
 
