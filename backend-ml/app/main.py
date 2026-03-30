@@ -18,6 +18,7 @@ app.add_middleware(
 
 Base.metadata.create_all(bind=engine)
 
-app.mount("/saved_images", StaticFiles(directory=IMAGE_FOLDER), name="saved_images")
-
 app.include_router(predictions_router)
+
+print("Serving images from:", IMAGE_FOLDER)
+app.mount("/saved_images", StaticFiles(directory=IMAGE_FOLDER), name="saved_images")

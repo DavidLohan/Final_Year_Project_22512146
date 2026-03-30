@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 
 public class PredictionClient {
 
-    private static final String PREDICT_URL = "http://127.0.0.1:8000/predict";
+    private static final String PREDICT_URL = BackendService.getBaseUrl() + "/predict";
 
     public static PredictionResult predict(WritableImage image) throws IOException, InterruptedException {
         byte[] imageBytes = toPngBytes(image);
@@ -32,7 +32,9 @@ public class PredictionClient {
                 .POST(HttpRequest.BodyPublishers.ofByteArray(body))
                 .build();
 
-        HttpClient client = HttpClient.newHttpClient();
+        HttpClient client = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
         if (response.statusCode() != 200) {
@@ -54,8 +56,9 @@ public class PredictionClient {
                 + "Content-Disposition: form-data; name=\"session_id\"\r\n\r\n"
                 + SessionManager.getSessionId() + "\r\n";
 
-        output.write(sessionPart.getBytes());
+        System.out.println("Sending session: " + SessionManager.getSessionId());
 
+        output.write(sessionPart.getBytes());
         String filePartHeader = "--" + boundary + "\r\n"
                 + "Content-Disposition: form-data; name=\"file\"; filename=\"drawing.png\"\r\n"
                 + "Content-Type: image/png\r\n\r\n";

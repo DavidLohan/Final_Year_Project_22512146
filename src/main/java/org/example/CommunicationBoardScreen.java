@@ -30,7 +30,7 @@ public class CommunicationBoardScreen {
         ObservableList<DrawingItem> drawings = FXCollections.observableArrayList();
 
         try {
-            drawings.addAll(BackendService.fetchDrawings());
+            loadDrawings(drawings);
             System.out.println("Drawings loaded into board: " + drawings.size());
         } catch (Exception e) {
             e.printStackTrace();
@@ -70,7 +70,8 @@ public class CommunicationBoardScreen {
                     setGraphic(null);
                     return;
                 }
-
+                System.out.println("Displaying item: " + item.getTitle());
+                System.out.println("Image object: " + item.getImage());
                 Image image = item.getImage();
                 thumb.setImage(image);
 
@@ -217,5 +218,13 @@ public class CommunicationBoardScreen {
         );
 
         return scene;
+    }
+    private void loadDrawings(ObservableList<DrawingItem> drawings) {
+        try {
+            drawings.clear();
+            drawings.addAll(BackendService.fetchDrawings());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
