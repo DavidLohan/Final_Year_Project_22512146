@@ -1,44 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QuickDraw Predictor</title>
-  <link rel="stylesheet" href="/style.css" />
-</head>
-<body>
-  <div class="container">
-    <h1>QuickDraw Predictor</h1>
-    <p class="subtitle">Draw on the canvas and submit your sketch for prediction.</p>
-
-    <div class="card">
-      <canvas id="drawingCanvas" width="300" height="300"></canvas>
-
-      <div class="button-row">
-        <button id="clearBtn">Clear</button>
-        <button id="submitBtn">Submit</button>
-        <button id="speakBtn" disabled>Speak Prediction</button>
-      </div>
-
-      <p id="statusMessage" class="status"></p>
-
-      <div id="predictionBox" class="prediction-box hidden">
-        <h2>Prediction Result</h2>
-        <p><strong>Label:</strong> <span id="predictedLabel">-</span></p>
-        <p><strong>Confidence:</strong> <span id="confidenceValue">-</span></p>
-
-        <h3>Top 3 Predictions</h3>
-        <ul id="top3List"></ul>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Saved Drawings</h2>
-      <button id="refreshBtn">Refresh History</button>
-      <div id="historyList" class="history-list"></div>
-    </div>
-  </div>
-
-  <script src="/app.js"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>web</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
