@@ -16,10 +16,11 @@ from models import PredictionRecord
 
 app = FastAPI()
 
-IMAGE_FOLDER = "saved_images"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+IMAGE_FOLDER = os.path.join(BASE_DIR, "saved_images")
 os.makedirs(IMAGE_FOLDER, exist_ok=True)
 app.mount("/saved_images", StaticFiles(directory=IMAGE_FOLDER), name="saved_images")
-
+print("Serving images from:", IMAGE_FOLDER)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -132,6 +133,7 @@ async def predict(
     session_id: str = Form(...),
     db: Session = Depends(get_db)
 ):
+    session_id = session_id.strip()
     image_bytes = await file.read()
 
     if not image_bytes:
@@ -204,7 +206,7 @@ def get_predictions(session_id: str, db: Session = Depends(get_db)):
             "id": item.id,
             "label": item.predicted_label,
             "confidence": item.confidence,
-            "imageUrl": f"http://127.0.0.1:8000/{item.image_path.replace(os.sep, '/')}",
+            "imageUrl": f"/saved_images/{os.path.basename(item.image_path)}",
             "createdAt": item.created_at.isoformat() if item.created_at else None,
         }
         for item in results

@@ -24,9 +24,12 @@ public class BackendService {
             System.getProperty("backend.url",
                     System.getenv().getOrDefault("BACKEND_URL", DEFAULT_BASE_URL));
 
-    private static final HttpClient client = HttpClient.newHttpClient();
+    private static final HttpClient client = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .build();
 
     public static String getBaseUrl() {
+        System.out.println("BackendService BASE_URL = " + BASE_URL);
         return BASE_URL;
     }
 
@@ -55,15 +58,28 @@ public class BackendService {
             String label = obj.get("label").getAsString();
             String imageUrl = obj.get("imageUrl").getAsString();
 
+            if (imageUrl.startsWith("/")) {
+                imageUrl = BASE_URL + imageUrl;
+            }
+            System.out.println("Loading image from: " + imageUrl);
+            Image image = new Image(imageUrl, true);
+
+            System.out.println("Loaded image width=" + image.getWidth() + ", height=" + image.getHeight());
+            System.out.println("Image error? " + image.isError());
+            if (image.isError()) {
+                System.out.println("Image load exception: " + image.getException());
+            }
             LocalDateTime createdAt = null;
             if (obj.has("createdAt") && !obj.get("createdAt").isJsonNull()) {
                 String createdAtStr = obj.get("createdAt").getAsString();
                 if (!createdAtStr.isBlank()) {
-                    createdAt = OffsetDateTime.parse(createdAtStr).toLocalDateTime();
+                    try {
+                        createdAt = OffsetDateTime.parse(createdAtStr).toLocalDateTime();
+                    } catch (Exception ex) {
+                        createdAt = LocalDateTime.parse(createdAtStr.replace("Z", ""));
+                    }
                 }
             }
-
-            Image image = new Image(imageUrl, true);
             drawings.add(new DrawingItem(id, label, image, createdAt));
         }
 
@@ -81,6 +97,7 @@ public class BackendService {
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        System.out.println("Fetch drawings response: " + response.body());
 
         if (response.statusCode() != 200) {
             throw new IOException("Failed to update drawing label. Status: " + response.statusCode()

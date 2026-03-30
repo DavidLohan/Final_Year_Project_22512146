@@ -13,8 +13,8 @@ model_service = ModelService()
 
 os.makedirs(IMAGE_FOLDER, exist_ok=True)
 
-@router.get("/")
-def root():
+@router.get("/api")
+def api():
     return {"message": "QuickDraw backend is running"}
 
 @router.get("/health")
@@ -31,7 +31,7 @@ async def predict(
 
     filename = f"{uuid.uuid4()}.png"
     filepath = os.path.join(IMAGE_FOLDER, filename)
-
+    print("Saving uploaded image to =", filepath)
     with open(filepath, "wb") as f:
         f.write(image_bytes)
 
@@ -76,13 +76,16 @@ def get_predictions(session_id: str, db: Session = Depends(get_db)):
         .order_by(PredictionRecord.created_at.desc())
         .all()
     )
-
+    for item in results:
+        print("DB image_path =", item.image_path)
+        print("Basename =", os.path.basename(item.image_path))
+        print("Expected URL =", f"{PUBLIC_BASE_URL}/saved_images/{os.path.basename(item.image_path)}")
     return [
         {
             "id": item.id,
             "label": item.predicted_label,
             "confidence": item.confidence,
-            "imageUrl": f"{PUBLIC_BASE_URL}/{item.image_path.replace(os.sep, '/')}",
+            "imageUrl": f"/saved_images/{os.path.basename(item.image_path)}",
             "createdAt": item.created_at.isoformat() if item.created_at else None,
         }
         for item in results

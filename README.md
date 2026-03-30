@@ -1,32 +1,50 @@
 # README
 
-This is my README file
+This project is a drawing-based communication application using a machine learning model. It includes a JavaFX desktop app, a FastAPI backend, a PostgreSQL database, and a web frontend for mobile use.
 
----
+## Run JavaFX (Desktop)
 
-## Running the Canvas
-
-As of rn to run the canvas run:
-
-```
 mvn clean javafx:run
-```
 
----
+## Run Backend (FastAPI)
 
-## Running the Machine Learning API
+- cd backend-ml
+- .\.venv312\Scripts\Activate.ps1
+- uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
-In the ML folder terminal may not be in the right path so gotta
-cd into the ML folder.
+## Run Web Frontend
 
-### Step 1: Activate Virtual Environment
+- cd web
+- python -m http.server 5500
 
-```
-.\.venv312\Scripts\Activate.ps1
-```
+## Access on Mobile
 
-### Step 2: Run the API
+1. Connect phone and laptop to the same network (recommended: use phone hotspot)
 
-```
-uvicorn api:app --reload --port 8000
-```
+2. Find your IP address:
+
+ipconfig
+
+Look for your IPv4 Address (example: 172.20.10.2)
+
+3. In web/app.js, set:
+
+const API_BASE = "http://<YOUR-IP>:8000";
+
+Example:
+
+const API_BASE = "http://172.20.10.2:8000";
+
+4. Open on your phone:
+
+http://<YOUR-IP>:5500
+
+5. Test backend connection:
+
+http://<YOUR-IP>:8000/health
+
+## Notes
+
+- JavaFX uses: http://127.0.0.1:8000
+- Web frontend uses your IP: http://<YOUR-IP>:8000
+- Both use the same backend and PostgreSQL database
