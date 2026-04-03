@@ -4,6 +4,7 @@ export default function FeedbackModal({
   attemptNumber,
   onCorrect,
   onIncorrect,
+  onSpeak,
   onClose,
 }) {
   if (!isOpen || !currentLabel) return null;
@@ -18,6 +19,9 @@ export default function FeedbackModal({
         <p className="modal-subtext">Attempt {attemptNumber} of 3</p>
 
         <div className="modal-actions">
+          <button className="primary-btn" type="button" onClick={onSpeak}>
+            Speak Word
+          </button>
           <button className="primary-btn" type="button" onClick={onCorrect}>
             Correct
           </button>

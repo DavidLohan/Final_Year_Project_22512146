@@ -169,6 +169,15 @@ export default function CanvasPage() {
     setSavedPredictionMeta(null);
     setAttemptIndex(0);
   }
+
+  function handleSpeak() {
+  if (!currentLabel) return;
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(currentLabel);
+  window.speechSynthesis.speak(utterance);
+}
+
   const currentLabel = predictionData?.top3?.[attemptIndex]?.label ?? null;
 
   return (
@@ -206,6 +215,7 @@ export default function CanvasPage() {
         attemptNumber={attemptIndex + 1}
         onCorrect={handleCorrect}
         onIncorrect={handleIncorrect}
+        onSpeak={handleSpeak}
         onClose={handleCloseModal}
       />
     </main>
