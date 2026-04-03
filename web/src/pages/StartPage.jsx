@@ -6,8 +6,8 @@ export default function StartPage() {
   return (
     <main className="screen screen-center">
       <div className="start-panel card">
-        <h1 className="hero-title">Drawing Communication App</h1>
-        <p className="hero-subtitle">Draw, confirm, and build your communication board.</p>
+        <h1 className="hero-title">Doodle Mind</h1>
+        <p className="hero-subtitle">Draw to communicate visually</p>
 
         <div className="start-actions">
           <button className="primary-btn large-btn" type="button" onClick={() => navigate("/canvas")}>

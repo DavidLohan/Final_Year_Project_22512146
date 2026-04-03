@@ -13,7 +13,7 @@ public class HomeScreen {
     private final Scene scene;
 
     public HomeScreen(Stage stage) {
-        Label title = new Label("Drawing Communication App");
+        Label title = new Label("Doodle Mind");
         title.getStyleClass().add("title-label");
         Label subtitle = new Label("Draw to communicate visually.");
         subtitle.getStyleClass().add("subtitle-label");
