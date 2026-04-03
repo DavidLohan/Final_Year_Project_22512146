@@ -31,10 +31,6 @@ Look for your IPv4 Address (example: 172.20.10.2)
 
 const API_BASE = "http://<YOUR-IP>:8000";
 
-Example:
-
-const API_BASE = "http://172.20.10.2:8000";
-
 4. Open on your phone:
 
 http://<YOUR-IP>:5500

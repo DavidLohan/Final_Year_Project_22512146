@@ -69,3 +69,4 @@ Thumbs.db
 .vscode/
 
 web/.gitignore
+web/.vite
